@@ -1,0 +1,13 @@
+bin/
+obj/
+
+*.user
+*.suo
+*.cache
+
+*.mp3
+*.wav
+*.zip
+
+.vs/
+*.nupkg

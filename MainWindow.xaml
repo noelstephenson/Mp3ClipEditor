@@ -1,0 +1,500 @@
+<Window x:Class="Mp3ClipEditorTagger.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:Mp3ClipEditorTagger.Controls"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        mc:Ignorable="d"
+        x:Name="RootWindow"
+        Title="MP3 Clip Editor and ID3 Tagger"
+        Width="1500"
+        Height="950"
+        MinWidth="1200"
+        MinHeight="720"
+        AllowDrop="True"
+        Drop="Window_Drop"
+        DragOver="Window_DragOver">
+  <Window.Resources>
+    <Style x:Key="CompactIntegerUpDownStyle" TargetType="xctk:IntegerUpDown">
+      <Setter Property="Width" Value="84" />
+      <Setter Property="Height" Value="24" />
+      <Setter Property="Margin" Value="10,0,0,0" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="TextAlignment" Value="Right" />
+      <Setter Property="HorizontalContentAlignment" Value="Right" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="ButtonSpinnerLocation" Value="Right" />
+      <Setter Property="AllowSpin" Value="True" />
+      <Setter Property="ShowButtonSpinner" Value="True" />
+      <Setter Property="FormatString" Value="F0" />
+    </Style>
+
+    <Style x:Key="CompactDoubleUpDownStyle" TargetType="xctk:DoubleUpDown">
+      <Setter Property="Width" Value="84" />
+      <Setter Property="Height" Value="24" />
+      <Setter Property="Margin" Value="10,0,0,0" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="TextAlignment" Value="Right" />
+      <Setter Property="HorizontalContentAlignment" Value="Right" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="ButtonSpinnerLocation" Value="Right" />
+      <Setter Property="AllowSpin" Value="True" />
+      <Setter Property="ShowButtonSpinner" Value="True" />
+      <Setter Property="FormatString" Value="F1" />
+    </Style>
+  </Window.Resources>
+
+  <Grid Margin="20">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <Border Grid.Row="0"
+            Margin="0,0,0,8"
+            CornerRadius="10"
+            BorderBrush="{StaticResource BorderBrushStrong}"
+            BorderThickness="1"
+            Background="#FFF8F4EF">
+      <Menu Background="Transparent">
+        <MenuItem Header="_File">
+          <MenuItem Header="_Import MP3 Files..."
+                    Click="MenuImportFiles_Click" />
+          <Separator />
+          <MenuItem Header="E_xit"
+                    Click="MenuExit_Click" />
+        </MenuItem>
+        <MenuItem Header="_Help">
+          <MenuItem Header="_Instructions"
+                    Click="MenuInstructions_Click" />
+          <MenuItem Header="_About"
+                    Click="MenuAbout_Click" />
+        </MenuItem>
+      </Menu>
+    </Border>
+
+    <Border Grid.Row="1"
+            Padding="14,12"
+            Margin="0,0,0,10"
+            CornerRadius="16"
+            Background="#FFE7D4">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <StackPanel VerticalAlignment="Center">
+          <TextBlock FontSize="22"
+                     FontWeight="Bold"
+                     Text="MP3 Clip Editor" />
+          <TextBlock Margin="0,2,0,0"
+                     FontSize="13"
+                     TextWrapping="Wrap"
+                     Foreground="{StaticResource SubtleTextBrush}"
+                     Text="Trim, preview, tag, rename, and export MP3 clips from one queue." />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Margin="20,0,0,0" VerticalAlignment="Center">
+          <TextBlock FontWeight="SemiBold" Text="Tracks Loaded" />
+          <TextBlock FontSize="22" FontWeight="Bold" Text="{Binding TrackCount, ElementName=RootWindow}" />
+          <TextBlock Margin="0,4,0,0" FontWeight="SemiBold" Text="Import Status" />
+          <TextBlock FontSize="13" Text="{Binding LoadStatus, ElementName=RootWindow}" />
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="2">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="1.1*" />
+        <ColumnDefinition Width="1.9*" />
+      </Grid.ColumnDefinitions>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="*" />
+      </Grid.RowDefinitions>
+
+      <Border Grid.Column="0"
+              Grid.Row="0"
+              Margin="0,0,14,14"
+              Padding="16"
+              CornerRadius="18"
+              Background="{StaticResource PanelBackgroundBrush}"
+              BorderBrush="{StaticResource BorderBrushStrong}"
+              BorderThickness="1.5">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+
+          <StackPanel Grid.Row="0" Margin="0,0,0,14">
+            <TextBlock FontSize="18" FontWeight="Bold" Text="Load MP3 Files" />
+            <TextBlock Margin="0,6,0,12"
+                       Foreground="{StaticResource SubtleTextBrush}"
+                       TextWrapping="Wrap"
+                       Text="Choose multiple MP3 files or drag them onto this window." />
+            <WrapPanel>
+              <Button Click="AddFilesButton_Click" Content="Add MP3 Files" />
+              <Button Click="RemoveSelectedButton_Click" Background="#FFF2ECE5" Foreground="{StaticResource TextBrush}" Content="Remove Active Track" />
+              <Button Click="ResetAllButton_Click" Background="#FFF2ECE5" Foreground="{StaticResource TextBrush}" Content="Reset All" />
+            </WrapPanel>
+          </StackPanel>
+
+          <StackPanel Grid.Row="1" Margin="0,0,0,12">
+            <TextBlock FontSize="18" FontWeight="Bold" Text="Track Defaults" />
+            <TextBlock Margin="0,6,0,12"
+                       Foreground="{StaticResource SubtleTextBrush}"
+                       TextWrapping="Wrap"
+                       Text="Applied to new tracks and reusable across the loaded queue." />
+
+            <WrapPanel VerticalAlignment="Top">
+              <StackPanel Margin="0,0,14,0">
+                <TextBlock Margin="0,0,0,4" Text="Clip duration" />
+                <xctk:IntegerUpDown Style="{StaticResource CompactIntegerUpDownStyle}"
+                                    FormatString="F0"
+                                    Minimum="5"
+                                    Maximum="180"
+                                    Increment="1"
+                                    Value="{Binding DefaultClipSeconds, ElementName=RootWindow, Mode=TwoWay}" />
+              </StackPanel>
+
+              <StackPanel Margin="0,0,14,0">
+                <TextBlock Margin="0,0,0,4" Text="Fade in" />
+                <xctk:DoubleUpDown Style="{StaticResource CompactDoubleUpDownStyle}"
+                                   Minimum="0"
+                                   Maximum="30"
+                                   Increment="0.5"
+                                   Value="{Binding DefaultFadeInSeconds, ElementName=RootWindow, Mode=TwoWay}" />
+              </StackPanel>
+
+              <StackPanel Margin="0,0,14,0">
+                <TextBlock Margin="0,0,0,4" Text="Fade out" />
+                <xctk:DoubleUpDown Style="{StaticResource CompactDoubleUpDownStyle}"
+                                   Minimum="0"
+                                   Maximum="30"
+                                   Increment="0.5"
+                                   Value="{Binding DefaultFadeOutSeconds, ElementName=RootWindow, Mode=TwoWay}" />
+              </StackPanel>
+
+              <StackPanel VerticalAlignment="Bottom">
+                <TextBlock Margin="0,0,0,4" Opacity="0" Text="Apply" />
+                <Button Height="24"
+                        Padding="10,3"
+                        HorizontalAlignment="Left"
+                        Click="ApplyDefaultsButton_Click"
+                        Background="#FFF2ECE5"
+                        Foreground="{StaticResource TextBrush}"
+                        Content="Apply Defaults" />
+              </StackPanel>
+            </WrapPanel>
+          </StackPanel>
+
+          <StackPanel Grid.Row="2">
+            <TextBlock FontSize="18" FontWeight="Bold" Text="Track Export Status" />
+            <TextBlock Margin="0,6,0,8"
+                       Foreground="{StaticResource SubtleTextBrush}"
+                       Text="{Binding ActiveTrackLabel, ElementName=RootWindow}" />
+            <Grid Margin="0,0,0,6">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <ProgressBar Height="18"
+                           Margin="0,0,8,0"
+                           VerticalAlignment="Center"
+                           Minimum="0"
+                           Maximum="100"
+                           Value="{Binding ExportProgressPercent, ElementName=RootWindow}" />
+              <Button Grid.Column="1"
+                      Height="24"
+                      Padding="10,3"
+                      Margin="0"
+                      VerticalAlignment="Center"
+                      Background="#FF2C6E49"
+                      Click="ExportAllButton_Click"
+                      Content="Export All Tracks" />
+            </Grid>
+            <TextBlock FontWeight="SemiBold"
+                       Text="{Binding ExportProgressText, ElementName=RootWindow}" />
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <Border Grid.Column="0"
+              Grid.Row="1"
+              Margin="0,0,14,0"
+              Padding="16"
+              CornerRadius="18"
+              Background="{StaticResource PanelBackgroundBrush}"
+              BorderBrush="{StaticResource BorderBrushStrong}"
+              BorderThickness="1.5">
+        <DockPanel>
+          <Grid DockPanel.Dock="Top" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock FontSize="20"
+                       FontWeight="Bold"
+                       Text="Batch Queue" />
+            <TextBlock Grid.Column="1"
+                       VerticalAlignment="Bottom"
+                       HorizontalAlignment="Right"
+                       Foreground="{StaticResource SubtleTextBrush}"
+                       FontWeight="SemiBold"
+                       Text="Edit Artist/Title ID3 Tags" />
+          </Grid>
+          <DataGrid ItemsSource="{Binding Tracks, ElementName=RootWindow}"
+                    SelectedItem="{Binding SelectedTrack, ElementName=RootWindow, Mode=TwoWay}"
+                    SelectionChanged="TrackGrid_SelectionChanged"
+                    IsReadOnly="False">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Track" Binding="{Binding FileName}" IsReadOnly="True" Width="1.6*" />
+              <DataGridTextColumn Header="Duration" Binding="{Binding DurationText}" IsReadOnly="True" Width="0.65*" />
+              <DataGridTextColumn Header="Clip" Binding="{Binding ClipLengthText}" IsReadOnly="True" Width="0.65*" />
+              <DataGridTextColumn Header="Audio" Binding="{Binding IsAudioLoaded}" IsReadOnly="True" Width="0.55*" />
+              <DataGridCheckBoxColumn Header="Norm" Binding="{Binding NormalizeEnabled, Mode=TwoWay}" Width="0.55*" />
+              <DataGridCheckBoxColumn Header="ID3" Binding="{Binding WriteId3Enabled, Mode=TwoWay}" Width="0.55*" />
+              <DataGridTextColumn Header="Artist" Binding="{Binding Artist, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="1.1*" />
+              <DataGridTextColumn Header="Title" Binding="{Binding Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="1.2*" />
+            </DataGrid.Columns>
+          </DataGrid>
+        </DockPanel>
+      </Border>
+
+      <Border Grid.Column="1"
+              Grid.Row="0"
+              Grid.RowSpan="2"
+              Padding="18"
+              CornerRadius="18"
+              Background="{StaticResource PanelBackgroundBrush}"
+              BorderBrush="{StaticResource BorderBrushStrong}"
+              BorderThickness="1.5">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel>
+            <Expander IsExpanded="True">
+              <Expander.Header>
+                <Grid MinWidth="400">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <StackPanel>
+                    <TextBlock FontSize="20" FontWeight="Bold" Text="Active Track" />
+                    <TextBlock Margin="0,4,0,0"
+                               Foreground="{StaticResource SubtleTextBrush}"
+                               FontSize="15"
+                               Text="{Binding ActiveTrackLabel, ElementName=RootWindow}" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Margin="0,0,18,0" Text="Duration " />
+                    <TextBlock Margin="0,0,18,0" FontWeight="Bold" Text="{Binding DurationText, ElementName=RootWindow}" />
+                    <TextBlock Margin="0,0,18,0" Text="Position " />
+                    <TextBlock FontWeight="Bold" Text="{Binding CurrentPositionText, ElementName=RootWindow}" />
+                  </StackPanel>
+                </Grid>
+              </Expander.Header>
+
+              <Grid Margin="0,14,0,0">
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto" />
+                  <RowDefinition Height="*" />
+                  <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Margin="0,0,0,12">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+
+                  <TextBlock VerticalAlignment="Center" Text="Artist" />
+                  <TextBox Grid.Column="1"
+                           Margin="8,0,16,0"
+                           Text="{Binding SelectedTrack.Artist, ElementName=RootWindow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                  <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="Title" />
+                  <TextBox Grid.Column="3"
+                           Margin="8,0,16,0"
+                           Text="{Binding SelectedTrack.Title, ElementName=RootWindow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                  <TextBlock Grid.Column="4" VerticalAlignment="Center" Text="Output" />
+                  <TextBox Grid.Column="5"
+                           Margin="8,0,0,0"
+                           IsReadOnly="True"
+                           Text="{Binding SelectedTrack.OutputFileName, ElementName=RootWindow, Mode=OneWay}" />
+                </Grid>
+
+                <Grid Grid.Row="1" MinHeight="260">
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                  </Grid.RowDefinitions>
+
+                  <controls:WaveformView Grid.Row="0"
+                                         Margin="0,0,10,14"
+                                         MinHeight="240"
+                                         VerticalAlignment="Stretch"
+                                         SeekRequested="WaveformView_SeekRequested"
+                                         Peaks="{Binding CurrentPeaks, ElementName=RootWindow, Mode=OneWay}"
+                                         DurationSeconds="{Binding SelectedTrack.DurationSeconds, ElementName=RootWindow, Mode=OneWay}"
+                                         SelectionStartSeconds="{Binding SelectedTrack.SelectionStartSeconds, ElementName=RootWindow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         SelectionEndSeconds="{Binding SelectedTrack.SelectionEndSeconds, ElementName=RootWindow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         PlayheadRatio="{Binding PlayheadRatio, ElementName=RootWindow}" />
+
+                  <TextBlock Grid.Row="1"
+                             Margin="0,0,0,12"
+                             Foreground="{StaticResource SubtleTextBrush}"
+                             Text="Drag the bottom markers on the waveform to move the clip start and end points." />
+
+                  <UniformGrid Grid.Row="2" Columns="7" Margin="0,0,0,8">
+                    <Border Margin="0,0,10,0" Padding="10" Background="{StaticResource SurfaceBrush}" CornerRadius="12">
+                      <StackPanel>
+                        <TextBlock Text="Start" />
+                        <TextBlock FontSize="18" FontWeight="Bold" Text="{Binding StartText, ElementName=RootWindow}" />
+                      </StackPanel>
+                    </Border>
+                    <Border Margin="0,0,10,0" Padding="10" Background="{StaticResource SurfaceBrush}" CornerRadius="12">
+                      <StackPanel>
+                        <TextBlock Text="End" />
+                        <TextBlock FontSize="18" FontWeight="Bold" Text="{Binding EndText, ElementName=RootWindow}" />
+                      </StackPanel>
+                    </Border>
+                    <Border Margin="0,0,10,0" Padding="10" Background="{StaticResource SurfaceBrush}" CornerRadius="12">
+                      <StackPanel>
+                        <TextBlock Text="Clip Length" />
+                        <TextBlock FontSize="18" FontWeight="Bold" Text="{Binding ClipLengthText, ElementName=RootWindow}" />
+                      </StackPanel>
+                    </Border>
+                    <Border Margin="0,0,10,0" Padding="10" Background="{StaticResource SurfaceBrush}" CornerRadius="12">
+                      <StackPanel>
+                        <TextBlock Text="Current Position" />
+                        <TextBlock FontSize="18" FontWeight="Bold" Text="{Binding CurrentPositionText, ElementName=RootWindow}" />
+                      </StackPanel>
+                    </Border>
+                    <Border Margin="0,0,10,0" Padding="10" Background="{StaticResource SurfaceBrush}" CornerRadius="12">
+                      <StackPanel>
+                        <TextBlock Text="Fade In" />
+                        <TextBlock FontSize="18" FontWeight="Bold" Text="{Binding FadeInText, ElementName=RootWindow}" />
+                      </StackPanel>
+                    </Border>
+                    <Border Margin="0,0,10,0" Padding="10" Background="{StaticResource SurfaceBrush}" CornerRadius="12">
+                      <StackPanel>
+                        <TextBlock Text="Fade Out" />
+                        <TextBlock FontSize="18" FontWeight="Bold" Text="{Binding FadeOutText, ElementName=RootWindow}" />
+                      </StackPanel>
+                    </Border>
+                    <Border Padding="10" Background="{StaticResource SurfaceBrush}" CornerRadius="12">
+                      <StackPanel>
+                        <TextBlock Text="Gain" />
+                        <TextBlock FontSize="18" FontWeight="Bold" Text="{Binding GainText, ElementName=RootWindow}" />
+                      </StackPanel>
+                    </Border>
+                  </UniformGrid>
+                </Grid>
+
+                <StackPanel Grid.Row="2">
+                  <TextBlock Text="Fade in" />
+                  <Slider Minimum="0"
+                          Maximum="{Binding SelectedTrack.ClipLengthSeconds, ElementName=RootWindow}"
+                          Value="{Binding SelectedTrack.FadeInSeconds, ElementName=RootWindow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          ValueChanged="PlaybackSensitiveControl_Changed"
+                          IsEnabled="{Binding HasSelection, ElementName=RootWindow}" />
+
+                  <TextBlock Text="Fade out" />
+                  <Slider Minimum="0"
+                          Maximum="{Binding SelectedTrack.ClipLengthSeconds, ElementName=RootWindow}"
+                          Value="{Binding SelectedTrack.FadeOutSeconds, ElementName=RootWindow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          ValueChanged="PlaybackSensitiveControl_Changed"
+                          IsEnabled="{Binding HasSelection, ElementName=RootWindow}" />
+
+                  <TextBlock Text="Volume gain" />
+                  <Slider Minimum="-24"
+                          Maximum="12"
+                          Value="{Binding SelectedTrack.GainDb, ElementName=RootWindow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          ValueChanged="PlaybackSensitiveControl_Changed"
+                          IsEnabled="{Binding HasSelection, ElementName=RootWindow}" />
+
+                  <WrapPanel Margin="0,10,0,8">
+                    <CheckBox Content="Normalize clip volume"
+                              IsChecked="{Binding SelectedTrack.NormalizeEnabled, ElementName=RootWindow, Mode=TwoWay}"
+                              Checked="PlaybackSensitiveControl_Changed"
+                              Unchecked="PlaybackSensitiveControl_Changed" />
+                    <CheckBox Content="Write artist/title ID3 tags"
+                              IsChecked="{Binding SelectedTrack.WriteId3Enabled, ElementName=RootWindow, Mode=TwoWay}" />
+                  </WrapPanel>
+
+                  <WrapPanel>
+                    <Button Click="PlayFullButton_Click" Background="#FFF2ECE5" Foreground="{StaticResource TextBrush}" Content="Play Full Track" />
+                    <Button Click="PlaySelectionButton_Click" Content="Play Selection" />
+                    <Button Click="StopPlaybackButton_Click" Background="#FFF2ECE5" Foreground="{StaticResource TextBrush}" Content="Stop" />
+                    <Button Click="SaveActiveButton_Click" Background="{StaticResource AccentBrush}" Content="Save Active Clip" />
+                  </WrapPanel>
+                </StackPanel>
+              </Grid>
+            </Expander>
+
+            <Expander Margin="0,14,0,0"
+                      IsExpanded="{Binding IsRenamerExpanded, ElementName=RootWindow, Mode=TwoWay}">
+              <Expander.Header>
+                <StackPanel>
+                  <TextBlock FontSize="18" FontWeight="Bold" Text="Bulk Renamer" />
+                  <TextBlock Margin="0,4,0,0"
+                             Foreground="{StaticResource SubtleTextBrush}"
+                             Text="Parse queue filenames, write tags back to source MP3s, and rename files to Artist - Title.mp3." />
+                </StackPanel>
+              </Expander.Header>
+
+              <StackPanel Margin="0,14,0,0">
+                <TextBlock Margin="0,0,0,8"
+                           Foreground="{StaticResource SubtleTextBrush}"
+                           Text="Choose the source filename pattern, apply it to the queue tags, then bulk rename or write ID3 tags to the original MP3 files." />
+
+                <Grid Margin="0,0,0,12">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="280" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock VerticalAlignment="Center" Text="Filename Pattern" />
+                  <ComboBox Grid.Column="1"
+                            Margin="12,0,0,0"
+                            ItemsSource="{Binding RenamePatternOptions, ElementName=RootWindow}"
+                            SelectedItem="{Binding SelectedRenamePattern, ElementName=RootWindow, Mode=TwoWay}"
+                            DisplayMemberPath="Label" />
+                </Grid>
+
+                <WrapPanel Margin="0,0,0,10">
+                  <Button Click="ApplyFilenameTagsButton_Click"
+                          Background="#FFF2ECE5"
+                          Foreground="{StaticResource TextBrush}"
+                          Content="Apply Filename To Tags" />
+                  <Button Click="WriteQueueTagsButton_Click"
+                          Background="#FFF2ECE5"
+                          Foreground="{StaticResource TextBrush}"
+                          Content="Write Queue Tags To Source Files" />
+                  <Button Click="RenameQueueFilesButton_Click"
+                          Background="{StaticResource AccentBrush}"
+                          Content="Rename Queue Files" />
+                </WrapPanel>
+
+                <Border Padding="12"
+                        Background="{StaticResource SurfaceBrush}"
+                        CornerRadius="12">
+                  <TextBlock TextWrapping="Wrap"
+                             Text="{Binding RenameStatusText, ElementName=RootWindow}" />
+                </Border>
+              </StackPanel>
+            </Expander>
+          </StackPanel>
+        </ScrollViewer>
+      </Border>
+    </Grid>
+  </Grid>
+</Window>
