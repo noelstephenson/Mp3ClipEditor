@@ -8,6 +8,7 @@
         mc:Ignorable="d"
         x:Name="RootWindow"
         Title="MP3 Clip Editor and ID3 Tagger"
+        Icon="Mp3ClipEditor.ico"
         Width="1500"
         Height="950"
         MinWidth="1200"
